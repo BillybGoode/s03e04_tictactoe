@@ -1,30 +1,82 @@
 require 'player'
 
 class Game < Player
-  attr_accessor :board, :players
+  attr_accessor :board, :players, :round
 
-  def initialize()
+  def initialize
     @board = {"A" => [nil, nil, nil], "B" => [nil, nil, nil], "C" => [nil, nil, nil]}
-    @players = []
-
+    @players = [] # current player is the one at index 0 (change turn with .reverse!)
     for i in 0..1
         puts "Veuillez entrer le pseudo du joueur #{i+1} !!!"
         print " >> "
-        @players << Player.new(gets.chomp) 
+        @players << Player.new(gets.chomp)
+        puts "\n"
     end
   end
 
-  def self.ask_name
+  def ask_name
     puts "Quel est ton nom joueur(e) ?"
     print "  >> "
     # binding.pry
-    self.players << Player.new(gets.chomp).player_name
+    @players << Player.new(gets.chomp).player_name
   end
 
-  def self.board_is_full
+  def randomize_first_player
+    if rand(0..1) == 0
+        @players.reverse!
+    end
+    puts "Petit tirage à pile où face... \n...*ping* *tap*...\n"
+    puts "Ok c'est #{@players[0].player_name} qui va commencer à jouer"
+    puts "\n"
+  end
+
+  def give_symbol
+    @players[0].symbol = "X"
+    @players[1].symbol = "O"
+    puts "Super, c'est parti !!!\n#{@players[0].player_name} tu utiliseras les CROIX et\n#{@players[1].player_name} tu utiliseras les RONDS"
+    puts "\n"
+  end
+
+  def current_player
+    @players[0]
+  end
+
+  def board_display
+    puts "Voici le terrain de jeu !"
+    puts "\n"
+    puts @board
+    puts "\n"
+  end
+
+  def available_move(move)
+    result = false
+    if move == 'A1' || move == 'A2' || move == 'A3' || move == 'B1' || move == 'B2' || move == 'B3' || move == 'C1' || move == 'C2' || move == 'C3'
+      line_col = move.split('')
+      if @board[line_col[0]][line_col[1].to_i-1] != nil
+        puts "Ah non cette case est déjà prise désolé, essaie encore mon ami(e) !"
+      else 
+        result = true
+      end
+    else
+        puts "Il faut entrer une valeur du tableau ! (ex: A1, B3, C2, ...)"
+    end
+    result
+  end
+
+  def board_update(move, player)
+    line = move.split('')[0]
+    column = move.split('')[1].to_i - 1
+    @board[line][column] = player.symbol
+    self.board_display
+  end
+
+  def winner
+    false
+  end
+
+  def board_is_full
     status = true
-    @board.flatten(2).each do |cell| 
-        binding.pry
+    @board.flatten(2).each do |cell|
         if cell == nil
           status = false
           break
