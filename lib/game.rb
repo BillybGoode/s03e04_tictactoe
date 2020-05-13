@@ -17,7 +17,6 @@ class Game < Player
   def ask_name
     puts "Quel est ton nom joueur(e) ?"
     print "  >> "
-    # binding.pry
     @players << Player.new(gets.chomp).player_name
   end
 
@@ -33,7 +32,7 @@ class Game < Player
   def give_symbol
     @players[0].symbol = "X"
     @players[1].symbol = "O"
-    puts "Super, c'est parti !!!\n#{@players[0].player_name} tu utiliseras les CROIX et\n#{@players[1].player_name} tu utiliseras les RONDS"
+    puts "Super, c'est parti !!!\n#{@players[0].player_name} tu utiliseras les CROIX \"X\" et\n#{@players[1].player_name} tu utiliseras les RONDS \"O\""
     puts "\n"
   end
 
@@ -54,13 +53,14 @@ class Game < Player
       line_col = move.split('')
       if @board[line_col[0]][line_col[1].to_i-1] != nil
         puts "Ah non cette case est déjà prise désolé, essaie encore mon ami(e) !"
+        puts ""
       else 
         result = true
       end
     else
         puts "Il faut entrer une valeur du tableau ! (ex: A1, B3, C2, ...)"
     end
-    result
+    return result
   end
 
   def board_update(move, player)
@@ -70,18 +70,40 @@ class Game < Player
     self.board_display
   end
 
-  def winner
-    false
+  def winner(player)
+    if player.is_the_winner
+      puts "Congratulations #{player.player_name} you win the game !"
+      puts ""
+      return true
+    end
   end
 
-  def board_is_full
-    status = true
+  def is_board_full
+    board_is_full = true
     @board.flatten(2).each do |cell|
         if cell == nil
-          status = false
+          board_is_full = false
           break
         end
     end
-    status
+    puts "Oh my, this is a tie game !!" if board_is_full
+    return board_is_full
+  end
+
+  def launch_new_game
+    puts "Bon c'était fun, vous voulez continuer à jouer ? (y/n)"
+    puts "\n"
+    continue = gets.chomp
+    if continue.downcase == "y"
+      @board = {"A" => [nil, nil, nil], "B" => [nil, nil, nil], "C" => [nil, nil, nil]}
+      @players[0].plays = []
+      @players[1].plays = []
+      @players[0].symbol = ""
+      @players[1].symbol = ""
+      return true
+    else
+      puts "Ok à bientôt !"
+      return false
+    end
   end
 end
