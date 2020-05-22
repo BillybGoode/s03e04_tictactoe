@@ -1,10 +1,11 @@
 require 'player'
+require 'board'
 
 class Game < Player
-  attr_accessor :board, :players, :round
+  attr_accessor :board_hash, :players, :round
 
   def initialize
-    @board = {"A" => [nil, nil, nil], "B" => [nil, nil, nil], "C" => [nil, nil, nil]}
+    @board_hash = {"A" => [nil, nil, nil], "B" => [nil, nil, nil], "C" => [nil, nil, nil]}
     @players = [] # current player is the one at index 0 (change turn with .reverse!)
     for i in 0..1
         puts "Veuillez entrer le pseudo du joueur #{i+1} !!!"
@@ -24,9 +25,17 @@ class Game < Player
     if rand(0..1) == 0
         @players.reverse!
     end
-    puts "Petit tirage à pile où face... \n...*ping* *tap*...\n"
-    puts "Ok c'est #{@players[0].player_name} qui va commencer à jouer"
-    puts "\n"
+    print "Petit tirage à pile où face...
+...*ping* *tap*...
+[appuyez sur une touche]
+"
+    gets.chomp
+
+    print "Ok c'est #{@players[0].player_name} qui va commencer à jouer !!
+[appuyez sur une touche]
+"
+    gets.chomp
+
   end
 
   def give_symbol
@@ -34,6 +43,8 @@ class Game < Player
     @players[1].symbol = "O"
     puts "Super, c'est parti !!!\n#{@players[0].player_name} tu utiliseras les CROIX \"X\" et\n#{@players[1].player_name} tu utiliseras les RONDS \"O\""
     puts "\n"
+    puts "[appuyez sur une touche]"
+    gets.chomp
   end
 
   def current_player
@@ -41,24 +52,21 @@ class Game < Player
   end
 
   def board_display
-    puts "Voici le terrain de jeu !"
-    puts "\n"
-    puts @board
-    puts "\n"
+    Board.new().display(@board_hash)
   end
 
   def available_move(move)
     result = false
     if move == 'A1' || move == 'A2' || move == 'A3' || move == 'B1' || move == 'B2' || move == 'B3' || move == 'C1' || move == 'C2' || move == 'C3'
       line_col = move.split('')
-      if @board[line_col[0]][line_col[1].to_i-1] != nil
+      if @board_hash[line_col[0]][line_col[1].to_i-1] != nil
         puts "Ah non cette case est déjà prise désolé, essaie encore mon ami(e) !"
         puts ""
       else 
         result = true
       end
     else
-        puts "Il faut entrer une valeur du tableau ! (ex: A1, B3, C2, ...)"
+        puts "Oups, essaie encore \nIl faut entrer une valeur du tableau ! (ex: A1, B3, C2, ...)"
     end
     return result
   end
@@ -66,7 +74,7 @@ class Game < Player
   def board_update(move, player)
     line = move.split('')[0]
     column = move.split('')[1].to_i - 1
-    @board[line][column] = player.symbol
+    @board_hash[line][column] = player.symbol
     self.board_display
   end
 
@@ -80,7 +88,7 @@ class Game < Player
 
   def is_board_full
     board_is_full = true
-    @board.flatten(2).each do |cell|
+    @board_hash.flatten(2).each do |cell|
         if cell == nil
           board_is_full = false
           break
@@ -95,7 +103,7 @@ class Game < Player
     puts "\n"
     continue = gets.chomp
     if continue.downcase == "y"
-      @board = {"A" => [nil, nil, nil], "B" => [nil, nil, nil], "C" => [nil, nil, nil]}
+      @board_hash = {"A" => [nil, nil, nil], "B" => [nil, nil, nil], "C" => [nil, nil, nil]}
       @players[0].plays = []
       @players[1].plays = []
       @players[0].symbol = ""
